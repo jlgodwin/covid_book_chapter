@@ -1,6 +1,4 @@
 rm(list=ls())
-setwd("~/Dropbox/covid_book_chapter/")
-
 # Libraries ####
 library(tidyverse)
 library(scales)
@@ -18,6 +16,14 @@ summary(state_data)
 
 unique(state_data$`End Date`)
 
+us_nat_avr <- state_data %>%
+    filter(!(State %in% c("Puerto Rico",
+                          "New York City"))) %>%
+    group_by(Age) %>%
+    summarise(Population = sum(Population, na.rm = T), .groups = "drop") %>%
+    mutate(cx = Population/sum(Population)) %>%
+    pull(cx)
+
 
 ## Age Range ####
 
@@ -29,7 +35,7 @@ unique(state_data$Race)
 
 # Select States ####
 
-states <- c("California", "New York")
+states <- c("FL" = "Florida", "WA" = "Washington")
 races <- c("Hispanic", "Non-Hispanic White")
 
 hisp_cols <- c("navy", "forestgreen")
@@ -55,13 +61,13 @@ par(mfrow = c(2,2))
 
 barplot(lx ~ Age,
         data = lt_data %>%
-         filter(State == "California" &
-                    Race == "Hispanic"),
-     border = FALSE,
-     xlab = "",
-     ylab = "Population",
-     main = "Hispanic",
-     col = alpha("navy", .25))
+            filter(State == states[1] &
+                       Race == "Hispanic"),
+        border = FALSE,
+        xlab = "",
+        ylab = "Population",
+        main = "Hispanic",
+        col = alpha("navy", .25))
 
 barplot(lx ~ Age,
         data = lt_data %>%
@@ -81,7 +87,7 @@ legend("topright",
 
 barplot(cx ~ Age,
         data = lt_data %>%
-            filter(State == "California" &
+            filter(State == states[1]  &
                        Race == "Hispanic"),
         border = FALSE,
         xlab = "",
@@ -101,7 +107,7 @@ barplot(cx ~ Age,
 
 barplot(lx ~ Age,
         data = lt_data %>%
-            filter(State == "California" &
+            filter(State == states[1] &
                        Race == "Non-Hispanic White"),
         border = FALSE,
         xlab = "",
@@ -127,7 +133,7 @@ legend("topright",
 
 barplot(cx ~ Age,
         data = lt_data %>%
-            filter(State == "California" &
+            filter(State == states[1] &
                        Race == "Non-Hispanic White"),
         border = FALSE,
         xlab = "",
@@ -156,14 +162,21 @@ pop <- lt_data %>%
                            Age == "85 years and over" ~ "85+",
                            TRUE ~ Age),
            Age = gsub(" years", "", Age)) %>%
+    mutate(Age = factor(
+        Age,
+        levels = c(
+            '0-5', '5-14', '15-24', '25-34', '35-44', '45-54',
+            '55-64', '65-74', '75-84', '85+')
+    )) %>%
     ggplot(aes(x = Age, y = lx, fill = StateRace)) +
     geom_bar(stat = "identity", position = "dodge",
              show.legend = FALSE) +
     scale_fill_manual(values = cols,
-                      labels = c("CA, Hispanic",
-                                 "CA, Non-Hispanic White",
-                                 "NY, Hispanic",
-                                 "NY, Non-Hispanic White")) +
+                      labels = c(
+                          paste0(names(states)[1], ", Hispanic"),
+                          paste0(names(states)[1], ", Non-Hispanic White"),
+                          paste0(names(states)[2], ", Hispanic"),
+                          paste0(names(states)[2], ", Non-Hispanic White"))) +
     theme(legend.position = "none") +
     xlab("Age Group") +
     scale_x_discrete(guide = guide_axis(angle = 90)) +
@@ -185,14 +198,21 @@ dist <- lt_data %>%
                            Age == "85 years and over" ~ "85+",
                            TRUE ~ Age),
            Age = gsub(" years", "", Age)) %>%
+    mutate(Age = factor(
+        Age,
+        levels = c(
+            '0-5', '5-14', '15-24', '25-34', '35-44', '45-54',
+            '55-64', '65-74', '75-84', '85+')
+    )) %>%
     ggplot(aes(x = Age, y = cx, fill = StateRace)) +
     geom_bar(stat = "identity", position = "dodge",
              show.legend = FALSE) +
     scale_fill_manual(values = cols,
-                      labels = c("CA, Hispanic",
-                                 "CA, Non-Hispanic White",
-                                 "NY, Hispanic",
-                                 "NY, Non-Hispanic White")) +
+                      labels = c(
+                          paste0(names(states)[1], ", Hispanic"),
+                          paste0(names(states)[1], ", Non-Hispanic White"),
+                          paste0(names(states)[2], ", Hispanic"),
+                          paste0(names(states)[2], ", Non-Hispanic White"))) +
     theme(legend.position = "none") +
     xlab("Age Group") +
     scale_x_discrete(guide = guide_axis(angle = 90)) +
@@ -222,14 +242,21 @@ deaths <- lt_data %>%
                            Age == "85 years and over" ~ "85+",
                            TRUE ~ Age),
            Age = gsub(" years", "", Age)) %>%
+    mutate(Age = factor(
+        Age,
+        levels = c(
+            '0-5', '5-14', '15-24', '25-34', '35-44', '45-54',
+            '55-64', '65-74', '75-84', '85+')
+    )) %>%
     ggplot(aes(x = Age, y = dx, fill = StateRace)) +
     geom_bar(stat = "identity", position = "dodge",
              show.legend = FALSE) +
     scale_fill_manual(values = cols,
-                      labels = c("CA, Hispanic",
-                                 "CA, Non-Hispanic White",
-                                 "NY, Hispanic",
-                                 "NY, Non-Hispanic White")) +
+                      labels = c(
+                          paste0(names(states)[1], ", Hispanic"),
+                          paste0(names(states)[1], ", Non-Hispanic White"),
+                          paste0(names(states)[2], ", Hispanic"),
+                          paste0(names(states)[2], ", Non-Hispanic White"))) +
     theme(legend.position = "none") +
     xlab("Age Group") +
     scale_x_discrete(guide = guide_axis(angle = 90)) +
@@ -246,14 +273,21 @@ nmx <- lt_data %>%
                            Age == "85 years and over" ~ "85+",
                            TRUE ~ Age),
            Age = gsub(" years", "", Age)) %>%
+    mutate(Age = factor(
+        Age,
+        levels = c(
+            '0-5', '5-14', '15-24', '25-34', '35-44', '45-54',
+            '55-64', '65-74', '75-84', '85+')
+    )) %>%
     ggplot(aes(x = Age, y = mx, fill = StateRace)) +
     geom_bar(stat = "identity", position = "dodge",
              show.legend = FALSE) +
     scale_fill_manual(values = cols,
-                      labels = c("CA, Hispanic",
-                                 "CA, Non-Hispanic White",
-                                 "NY, Hispanic",
-                                 "NY, Non-Hispanic White")) +
+                      labels = c(
+                          paste0(names(states)[1], ", Hispanic"),
+                          paste0(names(states)[1], ", Non-Hispanic White"),
+                          paste0(names(states)[2], ", Hispanic"),
+                          paste0(names(states)[2], ", Non-Hispanic White"))) +
     theme(legend.position = "none") +
     xlab("Age Group") +
     scale_x_discrete(guide = guide_axis(angle = 90)) +
@@ -285,10 +319,10 @@ lt_data %>%
         format = "latex",
         caption = paste0("The crude death rate for the Hispanic",
                          " and Non-Hispanic white populations ",
-                         "in California and New York."),
+                         "in ", states[1], " and ", states[2], "."),
         col.names = c("Population", "CDR")) %>%
-    pack_rows("California", 1, 2) %>%
-    pack_rows("New York", 3, 4)
+    pack_rows(states[1], 1, 2) %>%
+    pack_rows(states[2], 3, 4)
 
 ## ASMRs ####
 
@@ -302,6 +336,11 @@ us_cx <- lt_data %>%
     group_by(Race) %>%
     mutate("cx" = lx/sum(lx))
 
+us_cx %>%
+    filt
+    group_by(Age) %>%
+    summarize(cx = mean(cx))
+
 us_hisp_cx <- us_cx %>%
     filter(Race == "Hispanic") %>%
     ungroup() %>%
@@ -314,22 +353,29 @@ us_white_cx <- us_cx %>%
     unlist()
 
 ny_hisp_cx <- lt_data %>%
-    filter(State == "New York",
+    filter(State == states[2],
            Race == "Hispanic") %>%
     ungroup() %>%
     select(cx) %>%
     unlist()
 
 ny_white_cx <- lt_data %>%
-    filter(State == "New York",
+    filter(State == states[2],
            Race == "Non-Hispanic White") %>%
     ungroup() %>%
     select(cx) %>%
     unlist()
 
 ca_white_cx <- lt_data %>%
-    filter(State == "California",
+    filter(State == states[1],
            Race == "Non-Hispanic White") %>%
+    ungroup() %>%
+    select(cx) %>%
+    unlist()
+
+ca_hisp_cx <- lt_data %>%
+    filter(State == states[1],
+           Race == "Hispanic") %>%
     ungroup() %>%
     select(cx) %>%
     unlist()
@@ -343,6 +389,7 @@ lt_data %>%
     summarize(NY = 100000*sum(ny_hisp_cx*mx),
               CA = 100000*sum(ca_hisp_cx*mx),
               US = 100000*sum(us_hisp_cx*mx),) %>%
+    rename(!!names(states)[2] := "NY", !!names(states)[1] := "CA") %>%
     mutate(across(where(is.numeric), ~round(., 1))) %>%
     ungroup() %>%
     select(-State) %>%
@@ -352,14 +399,15 @@ lt_data %>%
         position = "center",
         booktabs = TRUE,
         format = "latex",
-        caption = paste0("The age-standardized mortality rates for the Hispanic",
-                         " populations ",
-                         "in California and New York standardized using ",
-                         "the Hispanic age distributions of New York (Column 2), ",
-                         " California (Column 3), and the US (Column 4)."),
-        col.names = c("Population", "NY", "CA", "US")) %>%
-    pack_rows("California", 1, 1) %>%
-    pack_rows("New York", 2, 2)
+        caption = paste0(
+            "The age-standardized mortality rates for the Hispanic",
+            " populations in ", states[1], " and ", states[2],
+            " standardized using the Hispanic age distributions of ",
+            states[2], " (Column 2), ", " ", states[1],
+            " (Column 3), and the US (Column 4)."),
+        col.names = c("Population", names(states)[2], names(states)[1], "US")) %>%
+    pack_rows(states[1], 1, 1) %>%
+    pack_rows(states[2], 2, 2)
 
 
 ### White across ####
@@ -370,6 +418,7 @@ lt_data %>%
     summarize(NY = 100000*sum(ny_white_cx*mx),
               CA = 100000*sum(ca_white_cx*mx),
               US = 100000*sum(us_white_cx*mx),) %>%
+    rename(!!names(states)[2] := "NY", !!names(states)[1] := "CA") %>%
     mutate(across(where(is.numeric), ~round(., 1))) %>%
     ungroup() %>%
     select(-State) %>%
@@ -381,12 +430,47 @@ lt_data %>%
         format = "latex",
         caption = paste0("The age-standardized mortality rates for the Hispanic",
                          " and Non-Hispanic white populations ",
-                         "in California and New York standardized using ",
-                         "the Non-Hispanic white age distributions of New York (Column 2), ",
-                         " California (Column 3), and the US (Column 4)."),
-        col.names = c("Population", "NY", "CA", "US")) %>%
-    pack_rows("California", 1, 2) %>%
-    pack_rows("New York", 3, 4)
+                         "in ", states[1], " and ", states[2], " standardized using ",
+                         "the Non-Hispanic white age distributions of ",
+                         states[2], " (Column 2), ", " ", states[1],
+                         " (Column 3), and the US (Column 4)."),
+        col.names = c("Population", names(states)[2], names(states)[1], "US")) %>%
+    pack_rows(states[1], 1, 2) %>%
+    pack_rows(states[2], 3, 4)
 
+### state specific ####
+lt_data %>%
+    filter(State %in% states) %>%
+    mutate(State = factor(State, levels = unname(states))) %>%
+    filter(Race %in% races) %>%
+    arrange(State, Race, Age) %>%
+    ungroup() %>%
+    mutate(white_cx = c(ca_white_cx, ca_white_cx, ny_white_cx, ny_white_cx)) %>%
+    mutate(hisp_cx = c(ca_hisp_cx, ca_hisp_cx, ny_hisp_cx, ny_hisp_cx)) %>%
+    mutate(us_cx = c(us_nat_avr, us_nat_avr, us_nat_avr,us_nat_avr)) %>%
+    group_by(State, Race) %>%
+    summarize(Hispanic = 100000*sum(hisp_cx*mx),
+              White = 100000*sum(white_cx*mx),
+              US = 100000*sum(us_cx*mx),) %>%
+    mutate(across(where(is.numeric), ~round(., 1))) %>%
+    ungroup() %>%
+    select(-State) %>%
+    kbl(.,
+        align = c("l", "l", "r"),
+        valign = "!ht",
+        position = "center",
+        booktabs = TRUE,
+        format = "latex",
+        caption = paste0("The age-standardized mortality rates for the Hispanic",
+                         " and Non-Hispanic White populations ",
+                         "in ", states[1], " and ", states[2], " standardized using ",
+                         "the Hispanic age distribution of the state (Column 2),",
+                         "the Non-Hispanic White age distribution of the state (Column 3), ",
+                         "and the US overall Age Distribution (Column 4)."),
+        col.names = c("Population", "Hispanic", "White", "US")) %>%
+    pack_rows(states[1], 1, 2) %>%
+    pack_rows(states[2], 3, 4)
 
-
+lt_data %>%
+    filter(State %in% states) %>%
+    filter(Race %in% races)
